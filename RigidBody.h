@@ -17,14 +17,14 @@ class RigidBody {
         
         if (_type == dart::dynamics::Shape::BOX) {
             mShape = Eigen::make_aligned_shared<dart::dynamics::BoxShape>(_dim);
-			Ibody = Matrix3d::Zero();
+			Ibody = Eigen::Matrix3d::Zero();
 			Ibody(0, 0) = mMass*(_dim(0) * _dim(1) + _dim(1) * _dim(2)) / 12.0;
 			Ibody(1, 1) = mMass*(_dim(0) * _dim(0) + _dim(2) * _dim(2)) / 12.0;
 			Ibody(2, 2) = mMass*(_dim(0) * _dim(0) + _dim(1) * _dim(1)) / 12.0;
 
         } else if (_type == dart::dynamics::Shape::ELLIPSOID) {
             mShape = Eigen::make_aligned_shared<dart::dynamics::EllipsoidShape>(_dim);
-			Ibody = Matrix3d::Zero();
+			Ibody = Eigen::Matrix3d::Zero();
 			Ibody(0, 0) = 2 * mMass*(_dim(0) * _dim(0)) / 5.0;
 			Ibody(1, 1) = 2 * mMass*(_dim(0) * _dim(0)) / 5.0;
 			Ibody(2, 2) = 2 * mMass*(_dim(0) * _dim(0)) / 5.0;

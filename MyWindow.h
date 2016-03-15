@@ -2,6 +2,8 @@
 #define _MYWINDOW_
 
 #include "MyWorld.h"
+#include <Eigen/Dense>
+#include "dart/dart.h"
 
 class MyWindow : public dart::gui::Win3D {
  public:
