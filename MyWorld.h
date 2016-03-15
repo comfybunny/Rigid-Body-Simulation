@@ -53,6 +53,8 @@ class MyWorld {
 	void setExtForce(int _dir, double _mag) {
 		mForce[_dir] = _mag;
 	}
+
+	Eigen::Quaterniond getQdot(Eigen::Vector3d w, Eigen::Quaterniond q);
   
  protected:
 	int mFrame;

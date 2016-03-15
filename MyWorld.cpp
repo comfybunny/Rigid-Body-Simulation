@@ -72,6 +72,18 @@ void MyWorld::simulate() {
         Eigen::Vector3d dPos = mRigidBodies[i]->mLinMomentum / mRigidBodies[i]->mMass;
         Eigen::Vector3d dLinMom = mRigidBodies[i]->mMass * mGravity + mRigidBodies[i]->mAccumulatedForce;
         
+		// derivative of orientation
+		Eigen::Matrix3d rotMatrix = mRigidBodies[i]->mQuatOrient.toRotationMatrix();
+		Eigen::Vector3d w = (rotMatrix*(mRigidBodies[i]->Ibody)*rotMatrix.transpose()).inverse()*mRigidBodies[i]->mAngMomentum;
+		Eigen::Quaterniond qDot = getQdot(w, mRigidBodies[i]->mQuatOrient);
+
+		// derivative of angular momentum (torque)
+
+		// iterate through all the collisions and see if the collision involves current mRigidBody
+		for (int collision = 0; collision < mCollisionDetector->getNumContacts(); collision++) {
+
+		}
+
         // update position and linear momentum
         mRigidBodies[i]->mPosition += dPos * mTimeStep;
         mRigidBodies[i]->mLinMomentum += mTimeStep * dLinMom;
@@ -109,7 +121,11 @@ void MyWorld::collisionHandling() {
     // TODO: handle the collision events
 }
 
-
+Eigen::Quaterniond MyWorld::getQdot(Eigen::Vector3d w, Eigen::Quaterniond q){
+	// double w = -1.0 * q.vec().dot(w);
+	Eigen:Vector3d v = q.w()*w + w.cross(q.vec());
+	return Eigen::Quaterniond(-1.0 * q.vec().dot(w)/2.0, v(0)/2.0, v(1)/2.0, v(2)/2.0);
+}
 
 
 
