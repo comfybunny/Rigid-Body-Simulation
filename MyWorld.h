@@ -54,7 +54,8 @@ class MyWorld {
 		mForce[_dir] = _mag;
 	}
 
-	Eigen::Quaterniond getQdot(Eigen::Vector3d w, const Eigen::Quaterniond &q);
+	Eigen::Quaterniond getQdot(const Eigen::Vector3d& w, const Eigen::Quaterniond &q);
+
   
  protected:
 	int mFrame;
