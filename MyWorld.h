@@ -56,6 +56,7 @@ class MyWorld {
 
 	Eigen::Quaterniond getQdot(const Eigen::Vector3d& w, const Eigen::Quaterniond &q);
 
+	void newRandomBody();
   
  protected:
 	int mFrame;
@@ -65,6 +66,7 @@ class MyWorld {
 	CollisionInterface* mCollisionDetector; // Access to collision detection information
 	dart::simulation::WorldPtr mPinataWorld;
 	Eigen::Vector3d mForce;
+	int lastShape;
 };
 
 #endif

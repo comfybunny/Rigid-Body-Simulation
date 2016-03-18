@@ -81,6 +81,7 @@ void MyWindow::draw() {
   // Draw rigid bodies
   glEnable(GL_LIGHTING);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  // std::cout << mWorld->getNumRigidBodies() << std::endl;
   for (int i = 0; i < mWorld->getNumRigidBodies(); i++)
     mWorld->getRigidBody(i)->draw(mRI);
 
@@ -157,6 +158,12 @@ void MyWindow::keyboard(unsigned char key, int x, int y)
   case '4': // Hit the pinata from the back
     mWorld->setExtForce(2, 500.0);
     break;
+
+  case 'a':
+	  // randomly spawn a new rigid body
+	  mWorld->newRandomBody();
+	  // std::cout << mWorld->getNumRigidBodies() << std::endl;
+	  break;
 
   // case 'b': // Break the pinata
   //   mWorld->getPinataWorld()->getConstraintSolver()->removeAllConstraints();

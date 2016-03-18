@@ -7,6 +7,8 @@ using namespace Eigen;
 using namespace std;
 
 MyWorld::MyWorld() {
+	lastShape = 0;
+	srand(time(0));
     mFrame = 0;
     mTimeStep = 0.001;
     mGravity = Vector3d(0.0, -9.8, 0.0);
@@ -22,22 +24,23 @@ MyWorld::MyWorld() {
     rb1->mPosition[1] = -0.5;
     
     rb1->mAngMomentum = Vector3d(0.0, 0.01, 0.0);
-    
+	mRigidBodies.push_back(rb1);
     
     RigidBody *rb2 = new RigidBody(dart::dynamics::Shape::ELLIPSOID, Vector3d(0.06, 0.06, 0.06));
     mCollisionDetector->addRigidBody(rb2, "ellipse"); // Put rb2 in collision detector
     rb2->mPosition[0] = 0.3;
     rb2->mPosition[1] = -0.5;
     rb2->mAngMomentum = Vector3d(0.01, 0.0, 0.0);
-    rb2->mColor = Vector4d(0.2, 0.8, 0.2, 1.0); // Blue
+    rb2->mColor = Vector4d(0.2, 0.8, 0.2, 1.0); // Green
     mRigidBodies.push_back(rb2);
-	mRigidBodies.push_back(rb1);
+	
 }
 
 void MyWorld::initializePinata() {
+	mCollisionDetector->addSkeleton(mPinataWorld->getSkeleton(0));
     // Add pinata to the collison detector
-    mCollisionDetector->addSkeleton(mPinataWorld->getSkeleton(0));
-    
+
+
     // Add some damping in the Pinata joints
     int nJoints = mPinataWorld->getSkeleton(0)->getNumBodyNodes();
     for (int i = 0; i < nJoints; i++) {
@@ -164,7 +167,7 @@ void MyWorld::collisionHandling() {
 		}
 		
 		double v_r_minus = normal.dot(pa_dot_minus - pb_dot_minus);
-	//	cout << v_r_minus << endl;
+
 		if (v_r_minus > 0) {
 			continue;
 		}
@@ -174,14 +177,10 @@ void MyWorld::collisionHandling() {
 
 		
 		if (curr.rb1 != nullptr) {
-			//cout << "rb1 != null" << endl;
-			//cout << j*curr.normal << endl;
 			curr.rb1->mAccumulatedForce += j*normal / mTimeStep;
 			curr.rb1->mAccumulatedTorque += ((curr.point - curr.rb1->mPosition).cross(j*normal))/ mTimeStep;
 		}
 		if (curr.rb2 != nullptr) {
-			//cout << "rb2 != null" << endl;
-			//cout << j*curr.normal << endl;
 			curr.rb2->mAccumulatedForce -= j*normal /mTimeStep;
 			curr.rb2->mAccumulatedTorque += ((curr.point - curr.rb2->mPosition).cross(-j*normal))/mTimeStep;
 		}
@@ -196,4 +195,53 @@ Eigen::Quaterniond MyWorld::getQdot(const Eigen::Vector3d& w, const Eigen::Quate
 	res.w() = -1.0 * q.vec().dot(w)/2.0;
 	res.vec() = v/2.0;
 	return res;
+}
+
+void MyWorld::newRandomBody() {
+	int newColor = 0;
+	int bodyType = rand() % 2;
+	RigidBody *temp;
+	if (bodyType == 1) {
+		temp = new RigidBody(dart::dynamics::Shape::BOX, Vector3d(0.05, 0.05, 0.05));
+		newColor = 1;
+	}
+	else {
+		temp = new RigidBody(dart::dynamics::Shape::ELLIPSOID, Vector3d(0.06, 0.06, 0.06));
+	}
+	RigidBody * prev = mRigidBodies.back();
+	if (lastShape == 0) {
+		prev->mColor = Vector4d(0.2, 0.8, 0.2, 1.0);
+	}
+	else {
+		prev->mColor = Vector4d(0.8, 0.2, 0.2, 1.0);
+	}
+
+	lastShape = newColor;
+
+	temp->mColor = Vector4d(0.2, 0.2, 0.8, 1.0);
+	mCollisionDetector->addRigidBody(temp, std::to_string(mRigidBodies.size()));
+
+	// try adding to collision detector, else I can just test this myself
+	temp->mPosition[0] = (rand() % 80) / 100.0 - 0.4;
+	temp->mPosition[1] = (rand() % 80) / 100.0 - 1;
+	temp->mPosition[2] = (rand() % 80) / 100.0 - 0.4;
+	bool badStart = true;
+	mCollisionDetector->checkCollision();
+
+	while (badStart) {
+		int numContacts = mCollisionDetector->getNumContacts();
+
+		for (int collision = 0; collision < numContacts; collision++) {
+			RigidContact curr = mCollisionDetector->getContact(collision);
+			if (curr.rb1 == temp || curr.rb2 == temp) {
+				temp->mPosition[0] = (rand() % 80) / 100.0 - 0.4;
+				temp->mPosition[1] = (rand() % 80) / 100.0 - 1;
+				temp->mPosition[2] = (rand() % 80) / 100.0 - 0.4;
+				continue;
+			}
+		}
+		break;
+	}
+
+	mRigidBodies.push_back(temp);
 }
